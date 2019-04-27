@@ -26,7 +26,7 @@ pipeline{
             }
             steps{
                 withMaven(maven: 'M3', tempBinDir: '') {
-                    sh 'mvn clean install'
+                    sh 'mvn clean install package'
                 }
             }
         }
@@ -47,7 +47,13 @@ pipeline{
             sh "${sonarHome}/bin/sonar-scanner" }             
             }
         }
-        
+        stage('Code Deploy')
+        {
+            steps{
+                echo "Code is deployed into Tomcat"
+            //    sh 'cp '
+            }
+        }
     }
     post{
         always{
