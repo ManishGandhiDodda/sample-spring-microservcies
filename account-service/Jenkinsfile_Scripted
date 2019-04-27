@@ -35,3 +35,136 @@ node {
     }
 
 }
+
+
+parallel {
+                    stage ('Creating Custom Image of account-service')
+                    {
+                        steps{
+                            script{
+                            echo "Docker image of account-service is being created"
+                         //   sh '''cd account-service 
+                         //   docker build -t account_service:latest .'''
+                           def account_service_image = docker.build( "account-service:latest", "./account-service" ) 
+                            } 
+                        }
+                    }
+
+
+        stage('Building Account-service')
+        {
+            when{
+                expression{ params.Environmen == 'Linux'
+                params.Service == 'account-service' || 'All microservices'}
+            }
+            steps{
+                withMaven(maven: 'M3', tempBinDir: '') {
+                    sh 'mvn clean install'
+                }
+            }
+        }
+
+
+
+
+
+
+    stage('Code Analysis Using SonarQube'){
+             steps{
+                echo "Analysing the Code"
+            }           
+        }
+
+//Redundant Code
+stage('Building Customer-service')
+        {
+            when{
+                expression{ params.Environmen == 'Linux'
+                params.Service == 'customer-service' || 'All microservices'}
+            }
+            steps{
+                withMaven(maven: 'M3', tempBinDir: '') {
+                    sh 'mvn clean install'
+                }
+            }
+        }
+        stage('Building Discovery-service')
+        {
+            when{
+                expression{ params.Environmen == 'Linux'
+                params.Service == 'discovery-service' || 'All microservices'}
+            }
+            steps{
+                withMaven(maven: 'M3', tempBinDir: '') {
+                    sh 'mvn clean install'
+                }
+            }
+        }
+        stage('Building Gateway-service')
+        {
+            when{
+                expression{ params.Environmen == 'Linux'
+                params.Service == 'gateway-service' || 'All microservices'}
+            }
+            steps{
+                withMaven(maven: 'M3', tempBinDir: '') {
+                    sh 'mvn clean install'
+                }
+            }
+        }
+        stage('Building Zipkin-service')
+        {
+            when{
+                expression{ params.Environmen == 'Linux'
+                params.Service == 'zipkin-service' || 'All microservices'}
+            }
+            steps{
+                withMaven(maven: 'M3', tempBinDir: '') {
+                    sh 'mvn clean install'
+                }
+            }
+        }
+
+
+
+
+
+//        ----------
+
+node {
+
+    withMaven(maven:'maven') {
+
+        stage('Checkout') {
+            git url: 'https://github.com/saurabh0010/sample-spring-microservices.git', CredentialsID: 'github', branch: 'master'
+        }
+
+        stage('Build') {
+            sh 'mvn clean install'
+
+            def pom = readMavenPom file:'pom.xml'
+            print pom.version
+            env.version = pom.version
+        }
+
+        stage('Image') {
+            dir ('account-service') {
+                def app = docker.build "localhost:5000/account-service:${env.version}"
+                app.push()
+            }
+        }
+
+        stage ('Run') {
+            docker.image("localhost:5000/account-service:${env.version}").run('-p 2222:2222 -h account --name account --link discovery')
+        }
+
+        stage ('Final') {
+            build job: 'customer-service-pipeline', wait: false
+        }      
+
+    }
+
+}
+
+
+
