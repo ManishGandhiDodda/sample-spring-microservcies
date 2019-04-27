@@ -42,13 +42,17 @@ pipeline{
         }
         stage('Code Analysis')
         {
-            withSonarQubeEnv('SonarQube Server') {
-            sh "${sonarHome}/bin/sonar-scanner" }
+            steps{
+               withSonarQubeEnv('SonarQube Server') {
+            sh "${sonarHome}/bin/sonar-scanner" }             
+            }
         }
+        
     }
     post{
         always{
-            junit 'junit_reports/*.xml'
+            echo "Reports will be generated inf junit test cases are present in code"
+         //   junit 'junit_reports/*.xml'
         }
 
     }
