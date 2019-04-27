@@ -36,6 +36,7 @@ pipeline{
             steps{
                 script{
                     echo "Docker image of customer-service is created"
+                    echo "${manish}"
                 //    sh '''sudo docker build -t customer-service:latest ./customer-service'''
                 // /   def customer_service_image = docker.build( "customer-service:latest", "./customer-service" )
                   }
