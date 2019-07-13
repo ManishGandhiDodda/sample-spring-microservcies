@@ -1,3 +1,5 @@
+####file parsing line by line######
+
 echo "Enter file name:"
 read fname
 
@@ -21,7 +23,7 @@ done
 exec < $terminal
 
 
-###########file parsing#########
+###########file parsing word by word#########
 
 echo "Enter the file name"
   
@@ -45,3 +47,5 @@ do
 done
 
 exec < $terminal
+
+#########file parsing charcter by character###########
